@@ -1,0 +1,102 @@
+算法1   基于深度学习的网络流量异常检测算法
+输入：  待检测的网络流量
+输出：  检测结果(正常/异常)
+
+// 训练模型
+parameters = initialize_parameters()    // 初始化模型参数
+for i in iterations:
+// 重复下面的步骤，直到达到满意的效果
+    forward_propagation()               // 前向传播
+    compute_cost()                      // 计算代价
+    backward_propagation()              // 后向传播
+    update_parameters()                 // 更新参数
+
+// 使用训练好的模型进行预测
+output = model.predict(input)
+
+算法2   initialize_parameters 初始化算法
+输入：  初始化之前的数据
+输出：  初始化后的数据
+
+def initialize_parameters():
+    input = read_from_dataset(path)
+    for i in input:
+        output[i] = convert_sign_to_number(i)    // 符号特征的数字化
+        output[i] = convert_number_to_01(i)      // 数字特征的归一化
+    return output
+
+算法3   forward_propagation 前向传播
+输入：  A_prev: 前一层的输入
+        W: 权重矩阵
+        b: 偏置向量
+        activation: 本层所使用的激活函数
+输出：  A: 激活函数的输出
+        cache: 用于高效率的传播计算
+
+def linear_activation_forward(A_prev, W, b, activation): 
+    if activation == "sigmoid":
+        Z, linear_cache = linear_forward(A_prev, W, b)
+        A, activation_cache = sigmoid(Z)   
+    elif activation == "relu":
+        Z, linear_cache = linear_forward(A_prev, W, b)
+        A, activation_cache = relu(Z) 
+    cache = (linear_cache, activation_cache)
+    return A, cache
+
+def linear_activation_forward():
+    if "sigmoid"：
+            linear_forward()
+            sigmoid()
+    elif "relu":
+            linear_forward()
+            relu()
+
+def linear_forward(A, W, b): 
+    Z = np.dot(W,A)+b
+    cache = (A, W, b) 
+    return Z, cache
+
+算法4   compute_cost 计算代价
+输入：  AL: 概率向量，对标签的预测
+        Y: 真正的标签向量
+输出：  cost: 代价
+
+def compute_cost(AL, Y):
+    m = Y.shape[1]
+    // 计算代价
+    cost = -(1/m)*(np.dot(Y,np.log(AL).T) + np.dot((1-Y), np.log(1-AL).T)) 
+    return cost
+
+算法5   backward_propagation 后向传播
+输入：  AL: 概率向量，前向传播的输出
+        Y: 真正的标签向量
+        caches: 用于高效率的传播计算
+输出：  grads: 计算得到的梯度值
+
+def backward_propagation(AL, Y, caches):
+    grads = {}
+    // 初始化反向传播
+    dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+    // 获取第L层的梯度，L为层数
+    current_cache = caches[L-1]
+    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, activation = "sigmoid")
+    
+    for l in reversed(range(L-1)):
+        current_cache = caches[l]
+        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(l+2)], current_cache, activation = "relu")
+        grads["dA" + str(l + 1)] = dA_prev_temp
+        grads["dW" + str(l + 1)] = dW_temp
+        grads["db" + str(l + 1)] = db_temp
+    return grads
+
+算法6   update_parameters 更新参数
+输入：  parameters: 参数
+        grads: 梯度
+        learning_rate: 学习率
+输出：  parameters: 更新后的参数
+def update_parameters(parameters, grads, learning_rate):  
+    // 逐层更新参数，L为层数
+    for l in range(L):
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)]-learning_rate*grads['dW'+str(l+1)]
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)]-learning_rate*grads['db'+str(l+1)]
+    return parameters
